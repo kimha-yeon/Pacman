@@ -56,7 +56,6 @@ class Player {
         if (this.radians < 0 || this.radians > .75) {
             this.openRate = -this.openRate
         }
-
         this.radians += this.openRate
     }
 }
@@ -579,7 +578,7 @@ function animate() {
     if (player.velocity.x > 0) player.rotation = 0
     else if (player.velocity.x < 0) player.rotation = Math.PI
     else if (player.velocity.y > 0) player.rotation = Math.PI / 2
-    else if (player.velocity.y < 0) player.rotation = Math.PI * 2
+    else if (player.velocity.y < 0) player.rotation = Math.PI * 1.5
 }
 
 animate()
