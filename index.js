@@ -2,6 +2,7 @@ const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
 const scoreEl = document.querySelector('#scoreEl')
+const lifeEl = document.querySelector('#lifeEl')
 
 canvas.width = innerWidth
 canvas.height = innerHeight
@@ -57,6 +58,14 @@ class Player {
             this.openRate = -this.openRate
         }
         this.radians += this.openRate
+    }
+
+    reset() {
+      this.position = {x:Boundary.width + Boundary.width / 2, y:Boundary.height + Boundary.height / 2}
+      this.velocity = {x:0, y:0}
+      this.radians = 0.75
+      this.openRate = 0.12
+      this.rotation = 0
     }
 }
 
@@ -124,31 +133,33 @@ const pellets = []
 const boundaries = []
 const powerUps = []
 const ghosts = [
-    new Ghost({position : {
-        x:Boundary.width * 6 + Boundary.width / 2, 
-        y:Boundary.height + Boundary.height / 2
-    }, velocity : {
-        x:Ghost.speed,
-        y:0
-    },
-    }),
-    new Ghost({position : {
-        x:Boundary.width * 6 + Boundary.width / 2, 
-        y:Boundary.height * 4 + Boundary.height / 2
-    }, velocity : {
-        x:0,
-        y:Ghost.speed
-    }, color : 'pink'
-    }),
-    new Ghost({position : {
-        x:Boundary.width * 4 + Boundary.width / 2, 
-        y:Boundary.height * 8 + Boundary.height / 2
-    }, velocity : {
-        x:Ghost.speed,
-        y:0
-    }, color : 'green'
-    })
+  new Ghost({position : {
+    x:Boundary.width * 6 + Boundary.width / 2, 
+    y:Boundary.height + Boundary.height / 2
+  }, velocity : {
+      x:Ghost.speed,
+      y:0
+  },
+  }),
+  new Ghost({position : {
+    x:Boundary.width * 6 + Boundary.width / 2, 
+    y:Boundary.height * 4 + Boundary.height / 2
+  }, velocity : {
+    x:0,
+    y:Ghost.speed
+  }, color : 'pink'
+  }),
+  new Ghost({position : {
+    x:Boundary.width * 4 + Boundary.width / 2, 
+    y:Boundary.height * 8 + Boundary.height / 2
+  }, velocity : {
+    x:Ghost.speed,
+    y:0
+  }, color : 'green'
+  })
 ]
+
+
 
 const player = new Player({position : {x:Boundary.width + Boundary.width / 2, y:Boundary.height + Boundary.height / 2}, velocity:{x:0, y:0}})
 const keys = {
@@ -168,6 +179,7 @@ const keys = {
 
 let lastKey = ''
 let score = 0
+let life = 3
 
 const map = [
     ['1', '-', '-', '-', '-', '-', '-', '-', '-', '-', '2'],
@@ -393,7 +405,7 @@ const map = [
                   }
                 })
               )
-      }
+            }
     })
   })
 
@@ -460,15 +472,164 @@ function animate() {
             ) < ghost.radius + player.radius)  {
                 if (ghost.scared) {
                     ghosts.splice(i, 1)
+                    score += 100
+                    scoreEl.innerHTML = score
                 } else {
+                  if (life > 1) { // 목숨 감소 및 팩맨, 유령 초기화
                     cancelAnimationFrame(animationId)
+                    console.log('Lost a Life!')
+                    life -= 1
+                    lifeEl.innerHTML = life
+                    setTimeout(() => {
+                      player.reset()
+                      ghosts.splice(0, ghosts.length)
+                      ghosts.push(new Ghost({position : {
+                        x:Boundary.width * 6 + Boundary.width / 2, 
+                        y:Boundary.height + Boundary.height / 2
+                      }, velocity : {
+                          x:Ghost.speed,
+                          y:0
+                      },
+                      }))
+                      ghosts.push(new Ghost({position : {
+                        x:Boundary.width * 6 + Boundary.width / 2, 
+                        y:Boundary.height * 4 + Boundary.height / 2
+                      }, velocity : {
+                        x:0,
+                        y:Ghost.speed
+                      }, color : 'pink'
+                      }))
+                      ghosts.push( new Ghost({position : {
+                        x:Boundary.width * 4 + Boundary.width / 2, 
+                        y:Boundary.height * 8 + Boundary.height / 2
+                      }, velocity : {
+                        x:Ghost.speed,
+                        y:0
+                      }, color : 'green'
+                      }))
+                      keys.w.pressed = false
+                      keys.a.pressed = false
+                      keys.s.pressed = false
+                      keys.d.pressed = false
+                      animationId = requestAnimationFrame(animate)
+                  }, 300)
+                }
+                  else { // 게임 오버 및 새게임 시작(전부 초기화)
+                    cancelAnimationFrame(animationId)
+                    console.log('Game Over!')
+                    setTimeout(() => {
+                      // reset here
+                      life = 3
+                      lifeEl.innerHTML = life
+                      score = 0
+                      scoreEl.innerHTML = score
+                      player.reset()
+                      ghosts.splice(0, ghosts.length)
+                      ghosts.push(new Ghost({position : {
+                        x:Boundary.width * 6 + Boundary.width / 2, 
+                        y:Boundary.height + Boundary.height / 2
+                      }, velocity : {
+                          x:Ghost.speed,
+                          y:0
+                      },
+                      }))
+                      ghosts.push(new Ghost({position : {
+                        x:Boundary.width * 6 + Boundary.width / 2, 
+                        y:Boundary.height * 4 + Boundary.height / 2
+                      }, velocity : {
+                        x:0,
+                        y:Ghost.speed
+                      }, color : 'pink'
+                      }))
+                      ghosts.push( new Ghost({position : {
+                        x:Boundary.width * 4 + Boundary.width / 2, 
+                        y:Boundary.height * 8 + Boundary.height / 2
+                      }, velocity : {
+                        x:Ghost.speed,
+                        y:0
+                      }, color : 'green'
+                      }))
+                      map.forEach((row, i) => {
+                        row.forEach((symbol, j) => { 
+                          switch (symbol) {
+                            case '.':
+                              pellets.push(
+                                new Pellet({
+                                  position: {
+                                    x: j * Boundary.width + Boundary.width / 2,
+                                    y: i * Boundary.height + Boundary.height / 2
+                                  }
+                                })
+                              )
+                              break
+                          }
+                        }
+                        )
+                      }
+                      )
+                      animationId = requestAnimationFrame(animate)
+                    }, 1000)
+                  }
                 }
         }
     }
 
     // win condition
-    if (pellets.length === 0) {
+    if (pellets.length === 0) { 
         cancelAnimationFrame(animationId)
+        console.log('You Win!')
+        setTimeout(() => {
+          // reset here
+          life = 3
+          lifeEl.innerHTML = life
+          score = 0
+          scoreEl.innerHTML = score
+          player.reset()
+          ghosts.splice(0, ghosts.length)
+          ghosts.push(new Ghost({position : {
+            x:Boundary.width * 6 + Boundary.width / 2, 
+            y:Boundary.height + Boundary.height / 2
+          }, velocity : {
+              x:Ghost.speed,
+              y:0
+          },
+          }))
+          ghosts.push(new Ghost({position : {
+            x:Boundary.width * 6 + Boundary.width / 2, 
+            y:Boundary.height * 4 + Boundary.height / 2
+          }, velocity : {
+            x:0,
+            y:Ghost.speed
+          }, color : 'pink'
+          }))
+          ghosts.push( new Ghost({position : {
+            x:Boundary.width * 4 + Boundary.width / 2, 
+            y:Boundary.height * 8 + Boundary.height / 2
+          }, velocity : {
+            x:Ghost.speed,
+            y:0
+          }, color : 'green'
+          }))
+          map.forEach((row, i) => {
+            row.forEach((symbol, j) => { 
+              switch (symbol) {
+                case '.':
+                  pellets.push(
+                    new Pellet({
+                      position: {
+                        x: j * Boundary.width + Boundary.width / 2,
+                        y: i * Boundary.height + Boundary.height / 2
+                      }
+                    })
+                  )
+                  break
+              }
+            }
+            )
+          }
+          )
+          animationId = requestAnimationFrame(animate)
+        }, 1000)
     }
 
 
@@ -479,7 +640,6 @@ function animate() {
         if (Math.hypot(powerUp.position.x - player.position.x, powerUp.position.y - player.position.y
             ) < powerUp.radius + player.radius) {
                 powerUps.splice(i, 1)
-                score += 100
 
                 ghosts.forEach(ghost => {
                     ghost.scared = true
@@ -582,6 +742,8 @@ function animate() {
 }
 
 animate()
+
+console.log('out')
 
 addEventListener('keydown', ({key}) => {
     switch (key) {
