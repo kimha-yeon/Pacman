@@ -59,14 +59,6 @@ class Player {
         }
         this.radians += this.openRate
     }
-
-    reset() {
-      this.position = {x:Boundary.width + Boundary.width / 2, y:Boundary.height + Boundary.height / 2}
-      this.velocity = {x:0, y:0}
-      this.radians = 0.75
-      this.openRate = 0.12
-      this.rotation = 0
-    }
 }
 
 class Ghost {
@@ -132,36 +124,91 @@ class PowerUp {
 const pellets = []
 const boundaries = []
 const powerUps = []
-const ghosts = [
-  new Ghost({position : {
+const ghosts = []
+
+function resetGhost() {
+  ghosts.splice(0, ghosts.length)
+  ghosts.push(new Ghost({position : {
     x:Boundary.width * 6 + Boundary.width / 2, 
     y:Boundary.height + Boundary.height / 2
   }, velocity : {
       x:Ghost.speed,
       y:0
   },
-  }),
-  new Ghost({position : {
+  }))
+  ghosts.push(new Ghost({position : {
     x:Boundary.width * 6 + Boundary.width / 2, 
     y:Boundary.height * 4 + Boundary.height / 2
   }, velocity : {
     x:0,
     y:Ghost.speed
   }, color : 'pink'
-  }),
-  new Ghost({position : {
+  }))
+  ghosts.push( new Ghost({position : {
     x:Boundary.width * 4 + Boundary.width / 2, 
     y:Boundary.height * 8 + Boundary.height / 2
   }, velocity : {
     x:Ghost.speed,
     y:0
   }, color : 'green'
-  })
-]
+  }))
+}
 
-
-
+resetGhost()
 const player = new Player({position : {x:Boundary.width + Boundary.width / 2, y:Boundary.height + Boundary.height / 2}, velocity:{x:0, y:0}})
+
+function resetPlayer() {
+  player.position = {x:Boundary.width + Boundary.width / 2, y:Boundary.height + Boundary.height / 2}
+  player.velocity = {x:0, y:0}
+  player.radians = 0.75
+  player.openRate = 0.12
+  player.rotation = 0
+}
+
+function resetMap() {
+  map.forEach((row, i) => {
+    row.forEach((symbol, j) => { 
+      switch (symbol) {
+        case '.':
+          pellets.push(
+            new Pellet({
+              position: {
+                x: j * Boundary.width + Boundary.width / 2,
+                y: i * Boundary.height + Boundary.height / 2
+              }
+            })
+          )
+          break
+          case 'p':
+            powerUps.push(
+              new PowerUp({
+                position: {
+                  x: j * Boundary.width + Boundary.width / 2,
+                  y: i * Boundary.height + Boundary.height / 2
+                }
+              })
+            )
+      }
+    }
+    )
+  }
+  )
+}
+
+function resetInfo() {
+  life = 3
+  lifeEl.innerHTML = life
+  score = 0
+  scoreEl.innerHTML = score
+}
+
+function resetPressedKey() {
+  keys.w.pressed = false
+  keys.a.pressed = false
+  keys.s.pressed = false
+  keys.d.pressed = false
+}
+
 const keys = {
     w: {
         pressed : false
@@ -182,232 +229,232 @@ let score = 0
 let life = 3
 
 const map = [
-    ['1', '-', '-', '-', '-', '-', '-', '-', '-', '-', '2'],
-    ['|', '.', '.', '.', '.', '.', '.', '.', '.', '.', '|'],
-    ['|', '.', 'b', '.', '[', '7', ']', '.', 'b', '.', '|'],
-    ['|', '.', '.', '.', '.', '_', '.', '.', '.', '.', '|'],
-    ['|', '.', '[', ']', '.', '.', '.', '[', ']', '.', '|'],
-    ['|', '.', '.', '.', '.', '^', '.', '.', '.', '.', '|'],
-    ['|', '.', 'b', '.', '[', '+', ']', '.', 'b', '.', '|'],
-    ['|', '.', '.', '.', '.', '_', '.', '.', '.', '.', '|'],
-    ['|', '.', '[', ']', '.', '.', '.', '[', ']', '.', '|'],
-    ['|', '.', '.', '.', '.', '^', '.', '.', '.', '.', '|'],
-    ['|', '.', 'b', '.', '[', '5', ']', '.', 'b', '.', '|'],
-    ['|', '.', '.', '.', '.', '.', '.', '.', '.', 'p', '|'],
-    ['4', '-', '-', '-', '-', '-', '-', '-', '-', '-', '3']
-  ]
+  ['1', '-', '-', '-', '-', '-', '-', '-', '-', '-', '2'],
+  ['|', '.', '.', '.', '.', '.', '.', '.', '.', '.', '|'],
+  ['|', '.', 'b', '.', '[', '7', ']', '.', 'b', '.', '|'],
+  ['|', '.', '.', '.', '.', '_', '.', '.', '.', '.', '|'],
+  ['|', '.', '[', ']', '.', '.', '.', '[', ']', '.', '|'],
+  ['|', '.', '.', '.', '.', '^', '.', '.', '.', '.', '|'],
+  ['|', '.', 'b', '.', '[', '+', ']', '.', 'b', '.', '|'],
+  ['|', '.', '.', '.', '.', '_', '.', '.', '.', '.', '|'],
+  ['|', '.', '[', ']', '.', '.', '.', '[', ']', '.', '|'],
+  ['|', '.', '.', '.', '.', '^', '.', '.', '.', '.', '|'],
+  ['|', '.', 'b', '.', '[', '5', ']', '.', 'b', '.', '|'],
+  ['|', '.', '.', '.', '.', '.', '.', '.', '.', 'p', '|'],
+  ['4', '-', '-', '-', '-', '-', '-', '-', '-', '-', '3']
+]
 
 
-  function createImage(src) {
-    const image = new Image()
-    image.src = src
-    return image
-  }
+function createImage(src) {
+  const image = new Image()
+  image.src = src
+  return image
+}
 
-  map.forEach((row, i) => {
-    row.forEach((symbol, j) => { 
-      switch (symbol) {
-        case '-':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: Boundary.width * j,
-                y: Boundary.height * i
-              },
-              image: createImage('./img/pipeHorizontal.png')
-            })
-          )
-          break
-        case '|':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: Boundary.width * j,
-                y: Boundary.height * i
-              },
-              image: createImage('./img/pipeVertical.png')
-            })
-          )
-          break
-        case '1':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: Boundary.width * j,
-                y: Boundary.height * i
-              },
-              image: createImage('./img/pipeCorner1.png')
-            })
-          )
-          break
-        case '2':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: Boundary.width * j,
-                y: Boundary.height * i
-              },
-              image: createImage('./img/pipeCorner2.png')
-            })
-          )
-          break
-        case '3':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: Boundary.width * j,
-                y: Boundary.height * i
-              },
-              image: createImage('./img/pipeCorner3.png')
-            })
-          )
-          break
-        case '4':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: Boundary.width * j,
-                y: Boundary.height * i
-              },
-              image: createImage('./img/pipeCorner4.png')
-            })
-          )
-          break
-        case 'b':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: Boundary.width * j,
-                y: Boundary.height * i
-              },
-              image: createImage('./img/block.png')
-            })
-          )
-          break
-        case '[':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: j * Boundary.width,
-                y: i * Boundary.height
-              },
-              image: createImage('./img/capLeft.png')
-            })
-          )
-          break
-        case ']':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: j * Boundary.width,
-                y: i * Boundary.height
-              },
-              image: createImage('./img/capRight.png')
-            })
-          )
-          break
-        case '_':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: j * Boundary.width,
-                y: i * Boundary.height
-              },
-              image: createImage('./img/capBottom.png')
-            })
-          )
-          break
-        case '^':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: j * Boundary.width,
-                y: i * Boundary.height
-              },
-              image: createImage('./img/capTop.png')
-            })
-          )
-          break
-        case '+':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: j * Boundary.width,
-                y: i * Boundary.height
-              },
-              image: createImage('./img/pipeCross.png')
-            })
-          )
-          break
-        case '5':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: j * Boundary.width,
-                y: i * Boundary.height
-              },
-              color: 'blue',
-              image: createImage('./img/pipeConnectorTop.png')
-            })
-          )
-          break
-        case '6':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: j * Boundary.width,
-                y: i * Boundary.height
-              },
-              color: 'blue',
-              image: createImage('./img/pipeConnectorRight.png')
-            })
-          )
-          break
-        case '7':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: j * Boundary.width,
-                y: i * Boundary.height
-              },
-              color: 'blue',
-              image: createImage('./img/pipeConnectorBottom.png')
-            })
-          )
-          break
-        case '8':
-          boundaries.push(
-            new Boundary({
-              position: {
-                x: j * Boundary.width,
-                y: i * Boundary.height
-              },
-              image: createImage('./img/pipeConnectorLeft.png')
-            })
-          )
-          break
-        case '.':
-          pellets.push(
-            new Pellet({
-              position: {
-                x: j * Boundary.width + Boundary.width / 2,
-                y: i * Boundary.height + Boundary.height / 2
-              }
-            })
-          )
-          break
-        case 'p' :
-            powerUps.push(
-                new PowerUp({
-                  position: {
-                    x: j * Boundary.width + Boundary.width / 2,
-                    y: i * Boundary.height + Boundary.height / 2
-                  }
-                })
-              )
+map.forEach((row, i) => {
+  row.forEach((symbol, j) => { 
+    switch (symbol) {
+      case '-':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: Boundary.width * j,
+              y: Boundary.height * i
+            },
+            image: createImage('./img/pipeHorizontal.png')
+          })
+        )
+        break
+      case '|':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: Boundary.width * j,
+              y: Boundary.height * i
+            },
+            image: createImage('./img/pipeVertical.png')
+          })
+        )
+        break
+      case '1':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: Boundary.width * j,
+              y: Boundary.height * i
+            },
+            image: createImage('./img/pipeCorner1.png')
+          })
+        )
+        break
+      case '2':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: Boundary.width * j,
+              y: Boundary.height * i
+            },
+            image: createImage('./img/pipeCorner2.png')
+          })
+        )
+        break
+      case '3':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: Boundary.width * j,
+              y: Boundary.height * i
+            },
+            image: createImage('./img/pipeCorner3.png')
+          })
+        )
+        break
+      case '4':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: Boundary.width * j,
+              y: Boundary.height * i
+            },
+            image: createImage('./img/pipeCorner4.png')
+          })
+        )
+        break
+      case 'b':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: Boundary.width * j,
+              y: Boundary.height * i
+            },
+            image: createImage('./img/block.png')
+          })
+        )
+        break
+      case '[':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: j * Boundary.width,
+              y: i * Boundary.height
+            },
+            image: createImage('./img/capLeft.png')
+          })
+        )
+        break
+      case ']':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: j * Boundary.width,
+              y: i * Boundary.height
+            },
+            image: createImage('./img/capRight.png')
+          })
+        )
+        break
+      case '_':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: j * Boundary.width,
+              y: i * Boundary.height
+            },
+            image: createImage('./img/capBottom.png')
+          })
+        )
+        break
+      case '^':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: j * Boundary.width,
+              y: i * Boundary.height
+            },
+            image: createImage('./img/capTop.png')
+          })
+        )
+        break
+      case '+':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: j * Boundary.width,
+              y: i * Boundary.height
+            },
+            image: createImage('./img/pipeCross.png')
+          })
+        )
+        break
+      case '5':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: j * Boundary.width,
+              y: i * Boundary.height
+            },
+            color: 'blue',
+            image: createImage('./img/pipeConnectorTop.png')
+          })
+        )
+        break
+      case '6':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: j * Boundary.width,
+              y: i * Boundary.height
+            },
+            color: 'blue',
+            image: createImage('./img/pipeConnectorRight.png')
+          })
+        )
+        break
+      case '7':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: j * Boundary.width,
+              y: i * Boundary.height
+            },
+            color: 'blue',
+            image: createImage('./img/pipeConnectorBottom.png')
+          })
+        )
+        break
+      case '8':
+        boundaries.push(
+          new Boundary({
+            position: {
+              x: j * Boundary.width,
+              y: i * Boundary.height
+            },
+            image: createImage('./img/pipeConnectorLeft.png')
+          })
+        )
+        break
+      case '.':
+        pellets.push(
+          new Pellet({
+            position: {
+              x: j * Boundary.width + Boundary.width / 2,
+              y: i * Boundary.height + Boundary.height / 2
             }
-    })
+          })
+        )
+        break
+      case 'p' :
+          powerUps.push(
+              new PowerUp({
+                position: {
+                  x: j * Boundary.width + Boundary.width / 2,
+                  y: i * Boundary.height + Boundary.height / 2
+                }
+              })
+            )
+          }
   })
+})
 
 function circleCollidesWithRectangle({circle, rectangle}) {
     const padding = Boundary.width / 2 - circle.radius - 1
@@ -464,7 +511,6 @@ function animate() {
             }
         }
     }
-
     // detect collision btw ghosts and player
     for (let i = ghosts.length -1; 0 <= i; i--){
         const ghost = ghosts[i]
@@ -481,36 +527,8 @@ function animate() {
                     life -= 1
                     lifeEl.innerHTML = life
                     setTimeout(() => {
-                      player.reset()
-                      ghosts.splice(0, ghosts.length)
-                      ghosts.push(new Ghost({position : {
-                        x:Boundary.width * 6 + Boundary.width / 2, 
-                        y:Boundary.height + Boundary.height / 2
-                      }, velocity : {
-                          x:Ghost.speed,
-                          y:0
-                      },
-                      }))
-                      ghosts.push(new Ghost({position : {
-                        x:Boundary.width * 6 + Boundary.width / 2, 
-                        y:Boundary.height * 4 + Boundary.height / 2
-                      }, velocity : {
-                        x:0,
-                        y:Ghost.speed
-                      }, color : 'pink'
-                      }))
-                      ghosts.push( new Ghost({position : {
-                        x:Boundary.width * 4 + Boundary.width / 2, 
-                        y:Boundary.height * 8 + Boundary.height / 2
-                      }, velocity : {
-                        x:Ghost.speed,
-                        y:0
-                      }, color : 'green'
-                      }))
-                      keys.w.pressed = false
-                      keys.a.pressed = false
-                      keys.s.pressed = false
-                      keys.d.pressed = false
+                      resetPlayer()
+                      resetGhost()
                       animationId = requestAnimationFrame(animate)
                   }, 300)
                 }
@@ -518,64 +536,10 @@ function animate() {
                     cancelAnimationFrame(animationId)
                     console.log('Game Over!')
                     setTimeout(() => {
-                      // reset here
-                      life = 3
-                      lifeEl.innerHTML = life
-                      score = 0
-                      scoreEl.innerHTML = score
-                      player.reset()
-                      ghosts.splice(0, ghosts.length)
-                      ghosts.push(new Ghost({position : {
-                        x:Boundary.width * 6 + Boundary.width / 2, 
-                        y:Boundary.height + Boundary.height / 2
-                      }, velocity : {
-                          x:Ghost.speed,
-                          y:0
-                      },
-                      }))
-                      ghosts.push(new Ghost({position : {
-                        x:Boundary.width * 6 + Boundary.width / 2, 
-                        y:Boundary.height * 4 + Boundary.height / 2
-                      }, velocity : {
-                        x:0,
-                        y:Ghost.speed
-                      }, color : 'pink'
-                      }))
-                      ghosts.push( new Ghost({position : {
-                        x:Boundary.width * 4 + Boundary.width / 2, 
-                        y:Boundary.height * 8 + Boundary.height / 2
-                      }, velocity : {
-                        x:Ghost.speed,
-                        y:0
-                      }, color : 'green'
-                      }))
-                      map.forEach((row, i) => {
-                        row.forEach((symbol, j) => { 
-                          switch (symbol) {
-                            case '.':
-                              pellets.push(
-                                new Pellet({
-                                  position: {
-                                    x: j * Boundary.width + Boundary.width / 2,
-                                    y: i * Boundary.height + Boundary.height / 2
-                                  }
-                                })
-                              )
-                              break
-                              case 'p':
-                                powerUps.push(
-                                  new PowerUp({
-                                    position: {
-                                      x: j * Boundary.width + Boundary.width / 2,
-                                      y: i * Boundary.height + Boundary.height / 2
-                                    }
-                                  })
-                                )
-                          }
-                        }
-                        )
-                      }
-                      )
+                      resetInfo()
+                      resetPlayer()
+                      resetGhost()
+                      resetMap()
                       animationId = requestAnimationFrame(animate)
                     }, 1000)
                   }
@@ -588,64 +552,10 @@ function animate() {
         cancelAnimationFrame(animationId)
         console.log('You Win!')
         setTimeout(() => {
-          // reset here
-          life = 3
-          lifeEl.innerHTML = life
-          score = 0
-          scoreEl.innerHTML = score
-          player.reset()
-          ghosts.splice(0, ghosts.length)
-          ghosts.push(new Ghost({position : {
-            x:Boundary.width * 6 + Boundary.width / 2, 
-            y:Boundary.height + Boundary.height / 2
-          }, velocity : {
-              x:Ghost.speed,
-              y:0
-          },
-          }))
-          ghosts.push(new Ghost({position : {
-            x:Boundary.width * 6 + Boundary.width / 2, 
-            y:Boundary.height * 4 + Boundary.height / 2
-          }, velocity : {
-            x:0,
-            y:Ghost.speed
-          }, color : 'pink'
-          }))
-          ghosts.push( new Ghost({position : {
-            x:Boundary.width * 4 + Boundary.width / 2, 
-            y:Boundary.height * 8 + Boundary.height / 2
-          }, velocity : {
-            x:Ghost.speed,
-            y:0
-          }, color : 'green'
-          }))
-          map.forEach((row, i) => {
-            row.forEach((symbol, j) => { 
-              switch (symbol) {
-                case '.':
-                  pellets.push(
-                    new Pellet({
-                      position: {
-                        x: j * Boundary.width + Boundary.width / 2,
-                        y: i * Boundary.height + Boundary.height / 2
-                      }
-                    })
-                  )
-                  break
-                  case 'p':
-                    powerUps.push(
-                      new PowerUp({
-                        position: {
-                          x: j * Boundary.width + Boundary.width / 2,
-                          y: i * Boundary.height + Boundary.height / 2
-                        }
-                      })
-                    )
-              }
-            }
-            )
-          }
-          )
+          resetInfo()
+          resetPlayer()
+          resetGhost()
+          resetMap()
           animationId = requestAnimationFrame(animate)
         }, 1000)
     }
@@ -762,39 +672,40 @@ function animate() {
 animate()
 
 addEventListener('keydown', ({key}) => {
-    switch (key) {
-        case 'w':
-            keys.w.pressed = true
-            lastKey = 'w'
-            break
-        case 'a':
-            keys.a.pressed = true
-            lastKey = 'a'
-            break
-        case 's':
-            keys.s.pressed = true
-            lastKey = 's'
-            break
-        case 'd':
-            keys.d.pressed = true
-            lastKey = 'd'
-            break    
-    }
+  switch (key) {
+      case 'w':
+          keys.w.pressed = true
+          lastKey = 'w'
+          break
+      case 'a':
+          keys.a.pressed = true
+          lastKey = 'a'
+          break
+      case 's':
+          keys.s.pressed = true
+          lastKey = 's'
+          break
+      case 'd':
+          keys.d.pressed = true
+          lastKey = 'd'
+          break    
+  }
 })
 
+
 addEventListener('keyup', ({key}) => {
-    switch (key) {
-        case 'w':
-            keys.w.pressed = false
-            break
-        case 'a':
-            keys.a.pressed = false
-            break
-        case 's':
-            keys.s.pressed = false
-            break
-        case 'd':
-            keys.d.pressed = false
-            break    
-    }
+  switch (key) {
+      case 'w':
+          keys.w.pressed = false
+          break
+      case 'a':
+          keys.a.pressed = false
+          break
+      case 's':
+          keys.s.pressed = false
+          break
+      case 'd':
+          keys.d.pressed = false
+          break    
+  }
 })
