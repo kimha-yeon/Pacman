@@ -562,6 +562,15 @@ function animate() {
                                 })
                               )
                               break
+                              case 'p':
+                                powerUps.push(
+                                  new PowerUp({
+                                    position: {
+                                      x: j * Boundary.width + Boundary.width / 2,
+                                      y: i * Boundary.height + Boundary.height / 2
+                                    }
+                                  })
+                                )
                           }
                         }
                         )
@@ -623,6 +632,15 @@ function animate() {
                     })
                   )
                   break
+                  case 'p':
+                    powerUps.push(
+                      new PowerUp({
+                        position: {
+                          x: j * Boundary.width + Boundary.width / 2,
+                          y: i * Boundary.height + Boundary.height / 2
+                        }
+                      })
+                    )
               }
             }
             )
@@ -742,8 +760,6 @@ function animate() {
 }
 
 animate()
-
-console.log('out')
 
 addEventListener('keydown', ({key}) => {
     switch (key) {
